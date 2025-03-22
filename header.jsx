@@ -7,8 +7,8 @@ import {
   FaUser,
   FaLock,
 } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import CustomModal from '../Modal/modal-component';
 
 import '../../Pages/Notifications-icon/notificari.module.css';
@@ -16,11 +16,19 @@ import '../../Pages/MyAccount-icon/account.module.css';
 import Api from '../../../api';
 
 const Header = () => {
+  const navigate = useNavigate();
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [username, setUserName] = useState('');
   const [password, setPassword] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // verifica daca exista un token in localStorage la montarea componentei
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
 
   const toggleNotificationModal = () => {
     setIsNotificationModalOpen(!isNotificationModalOpen);
@@ -51,6 +59,7 @@ const Header = () => {
   
       // Salvarea token-ul în localStorage (pentru menținerea sesiunii)
       localStorage.setItem('token', response.data.idToken);
+      setIsAuthenticated(true);
       alert('Login successful!');
   
       // Închiderea modalul
@@ -65,6 +74,17 @@ const Header = () => {
     setPassword('');
   };
   
+  // Click pe butonul Adauga Anunt
+  const handleAddPostClick = () => {
+    if (isAuthenticated) {
+      // redirectionare pagina formular adauga anunt
+      navigate('/addPostForm');
+    } else {
+      //Aici era porblema, login nu este o pagina, ci un modal.
+      // Deschidere modalul de login 
+      toggleLoginModal();
+    }
+  };
 
   return (
     <>
@@ -116,6 +136,13 @@ const Header = () => {
             onClick={toggleLoginModal}
           >
             Inregistrare
+          </button>
+          <button
+            className={styles.headerBtn}
+            aria-label="Adaugă Anunț"
+            onClick={handleAddPostClick}
+          >
+            Adauga Anunt
           </button>
         </header>
       </div>
